@@ -175,3 +175,63 @@ join (
 order by comment_count desc
 ```  
 # SubQueries
+## EXISTS
+서브쿼리는 행을 반환하는지 여부를 판단하기 위해 실행됩니다.  
+서브쿼리가 최소 한 행이라도 반환하면 EXISTS는 true로 평가됩니다. 반환되는 행이 없으면 false로 평가됩니다.  
+서브쿼리는 바깥 쿼리의 변수를 참조할 수 있습니다.  
+서브쿼리는 끝까지 완전히 실행되는 것이 아니라, 최소 한 행이 반환되는지 확인되는 시점까지만 실행됩니다.  
+  
+## NOT EXISTS
+반환되는 행이 없으면 NOT EXISTS는 true로 평가됩니다. 반대로 서브쿼리가 최소 한 행이라도 반환하면 NOT EXISTS는 false로 평가됩니다.  
+
+row_constructor IN (subquery)    
+```
+(id, admission_score) in (
+    select student_id, avg(grade)
+    from student_grade
+    group by student_id
+)
+```
+## IN, NOT IN
+```sql
+select id, first_name, last_name
+from student
+where id in (
+    select 2
+    union all
+    select null 
+)
+order by id
+```
+in은 내부적으로 or로 풀리기 때문에 where id = 2 or id = null (unknown)이므로 2만 반환한다.  
+  
+```sql
+select id, first_name, last_name
+from student
+where null in (
+    select 2
+    union all
+    select null 
+)
+order by id
+```
+이 경우 where null = 2 or null = null로 아무런 값도 반환되지 않는다.  
+```sql
+select id, first_name, last_name
+from student
+where id not in (
+    select 2
+    union all
+    select null 
+)
+order by id
+```
+not in을 쓸 때는 주의해야 하는데, not in은 and로 풀린다.  
+따라서 where id <> 2 and id <> null 이므로 항상 빈 결과 집합이 반환된다.  
+  
+**not in을 사용하면서 null값이 포함되는 것은 상당히 위험하다.**  
+  
+
+  
+# TODO (study)
+semi join
